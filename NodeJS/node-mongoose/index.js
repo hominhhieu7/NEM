@@ -11,19 +11,28 @@ connect.then((db) => {
     Dishes.create({
         name: 'Pizza',
         description: 'New pizza'
-    })
-    .then((dish) => {
-        console.log(dish);
-        return Dishes.find({}).exec();
-    })
-    .then((dishes) => {
-        console.log(dishes);
-        return Dishes.remove({});
-    })
-    .then(() => {
-        return mongoose.connection.close();
-    })
-    .catch((err) => {
-        console.log(err);
-    });
+    }).then((dish) => {
+            console.log(dish);
+            return Dishes.findByIdAndUpdate(dish._id, { $set: { description: "Updated test" } }, { new: true }).exec();
+        })
+        .then((dish) => {
+            console.log(dish);
+
+            dish.comments.push({
+                rating: 5,
+                comment: 'Ngon',
+                author: 'Hiue'
+            });
+            return dish.save();
+        }).then((dish) => {
+            console.log(dish);
+            
+            return Dishes.remove({});
+        })
+        .then(() => {
+            return mongoose.connection.close();
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 });
