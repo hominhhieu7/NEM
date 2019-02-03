@@ -4,7 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-
+var passport = require('passport');
+var authenticate = require('./authenticate');
 
 
 
@@ -27,6 +28,7 @@ const connect = mongoose.connect(url);
 
 connect.then((db) => {
   console.log('Connected correctly');
+  console.log('http://localhost:4000/');
 }, (err) => {
   console.log(err)
 })
@@ -50,7 +52,11 @@ app.use(session({
   saveUninitialized: false,
   resave: false,
   store: new Filestore()
-}))
+}));
+
+app.use(passport.initialize());
+app.use(passport.session())
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 
@@ -59,22 +65,13 @@ app.use('/users', usersRouter);
 
 
 function auth(req, res, next) {
-  console.log(req.session);
-
-  if (!req.session.user) {
+  if (!req.user) {
     var err = new Error('You are not authenticated!');
     err.status = 403;
     return next(err);
   }
   else {
-    if (req.session.user === 'authenticated') {
       next();
-    }
-    else {
-      var err = new Error('You are not authenticated!');
-      err.status = 403;
-      return next(err);
-    }
   }
 }
 app.use(auth);
